@@ -1,43 +1,70 @@
+import tkinter as tk
 import random
 
-# Olası kelimeler listesi
-kelimeler = ["python", "bilgisayar", "programlama", "yapayzeka", "oyun", "matematik","istanbul","java"]
-
-# Rastgele bir kelime seç
+# Kelime listesi
+kelimeler = ["python", "bilgisayar", "programlama", "yapayzeka", "oyun", "matematik", "istanbul", "java"]
 secilen_kelime = random.choice(kelimeler)
-tahmin_edilen = ["_"] * len(secilen_kelime)  # Boş harf çizgileri
+tahmin_edilen = ["_"] * len(secilen_kelime)
 yanlis_tahminler = []
-hak = 6  # Maksimum yanlış tahmin hakkı
+hak = 6
 
-print("🎮 Adam Asmaca Oyununa Hoş Geldiniz!")
-print(" ".join(tahmin_edilen))  # Başlangıçta boş çizgileri göster
-
-while hak > 0 and "_" in tahmin_edilen:
-    print(f"\nKalan Hak: {hak}")
-    print(f"Yanlış Tahminler: {', '.join(yanlis_tahminler)}")
-    
-    harf = input("Bir harf tahmin et: ").lower()
+# Fonksiyon: Harf tahmini işlemi
+def tahmin_et():
+    global hak
+    harf = giris.get().lower()
+    giris.delete(0, tk.END)
 
     if len(harf) != 1 or not harf.isalpha():
-        print("⚠️ Lütfen sadece tek bir harf girin!")
-        continue
-    
+        bilgi_label.config(text="⚠️ Lütfen tek bir harf girin.")
+        return
     if harf in tahmin_edilen or harf in yanlis_tahminler:
-        print("⚠️ Bu harfi zaten tahmin ettin!")
-        continue
+        bilgi_label.config(text="⚠️ Bu harfi zaten denedin.")
+        return
 
     if harf in secilen_kelime:
         for i, karakter in enumerate(secilen_kelime):
             if karakter == harf:
                 tahmin_edilen[i] = harf
+        bilgi_label.config(text="✅ Doğru tahmin!")
     else:
         yanlis_tahminler.append(harf)
         hak -= 1
+        bilgi_label.config(text="❌ Yanlış tahmin!")
 
-    print(" ".join(tahmin_edilen))  # Güncellenmiş tahmin durumu
+    # Güncellemeleri yansıt
+    kelime_label.config(text=" ".join(tahmin_edilen))
+    hak_label.config(text=f"Kalan Hak: {hak}")
+    yanlis_label.config(text="Yanlış Harfler: " + ", ".join(yanlis_tahminler))
 
-# Oyun bitti, sonucu göster
-if "_" not in tahmin_edilen:
-    print("\n🎉 Tebrikler! Kelimeyi bildin:", secilen_kelime)
-else:
-    print("\n😢 Üzgünüm, kaybettin! Doğru kelime:", secilen_kelime)
+    if "_" not in tahmin_edilen:
+        bilgi_label.config(text="🎉 Tebrikler, kelimeyi buldun!")
+        tahmin_butonu.config(state=tk.DISABLED)
+    elif hak == 0:
+        bilgi_label.config(text=f"😢 Oyun bitti! Kelime: {secilen_kelime}")
+        tahmin_butonu.config(state=tk.DISABLED)
+
+# Arayüz kurulumu
+pencere = tk.Tk()
+pencere.title("Adam Asmaca - Tkinter")
+pencere.geometry("500x300")
+pencere.resizable(False, False)
+
+kelime_label = tk.Label(pencere, text=" ".join(tahmin_edilen), font=("Arial", 24))
+kelime_label.pack(pady=20)
+
+hak_label = tk.Label(pencere, text=f"Kalan Hak: {hak}", font=("Arial", 14))
+hak_label.pack()
+
+yanlis_label = tk.Label(pencere, text="Yanlış Harfler: ", font=("Arial", 12))
+yanlis_label.pack(pady=5)
+
+giris = tk.Entry(pencere, font=("Arial", 14), width=5, justify="center")
+giris.pack()
+
+tahmin_butonu = tk.Button(pencere, text="Tahmin Et", font=("Arial", 12), command=tahmin_et)
+tahmin_butonu.pack(pady=10)
+
+bilgi_label = tk.Label(pencere, text="", font=("Arial", 12))
+bilgi_label.pack()
+
+pencere.mainloop()
